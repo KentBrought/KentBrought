@@ -31,4 +31,4 @@ Some of my work is private or on the MIT GitHub Enterprise instance.
 
 ### Contribution Skyline
 
-![Animated GitHub contribution skyline](https://raw.githubusercontent.com/KentBrought/KentBrought/skyline-output/skyline.svg)
+![3D GitHub contribution city](./profile-3d-contrib/profile-night-green.svg)
