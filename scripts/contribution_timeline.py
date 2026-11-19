@@ -69,7 +69,7 @@ def el(parent, name, attrs=None, text=None):
     node = ET.SubElement(parent, f"{{{ns}}}{name}", attrs or {})
     if text is not None: node.text = str(text)
     return node
-root = ET.Element(f"{{{ns}}}svg", {"xmlns":ns,"viewBox":f"0 0 {width} {height}",
+root = ET.Element(f"{{{ns}}}svg", {"viewBox":f"0 0 {width} {height}",
     "width":str(width),"height":str(height),"role":"img",
     "aria-label":f"Isometric GitHub contribution timeline from {created} to {today}"})
 el(root,"title",text=f"{USERNAME} GitHub contributions, {created} to {today}")
