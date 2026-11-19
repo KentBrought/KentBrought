@@ -56,13 +56,13 @@ for year, user in by_year.items():
 # One uninterrupted week-by-week city, spanning account creation through today.
 first_sunday = created - dt.timedelta(days=(created.weekday()+1)%7)
 last_week = (today-first_sunday).days//7
-tile_x, tile_y = 13.0, 6.0
+tile_x, tile_y = 11.0, 5.0
 # Isometric view: weeks run horizontally, weekdays run diagonally down-right.
 def pos(week, weekday):
-    return 64 + week*tile_x + weekday*tile_y, 105 + week*1.45 + weekday*tile_y*0.65
+    return 72 + week*tile_x + weekday*tile_y, 125 + week*0.16 + weekday*tile_y*0.48
 
-width = int(64 + last_week*tile_x + 7*tile_y + 110)
-height = int(105 + last_week*1.45 + 7*tile_y + 185)
+width = int(72 + last_week*tile_x + 7*tile_y + 130)
+height = int(125 + last_week*0.16 + 7*tile_y*0.48 + 125)
 ns = "http://www.w3.org/2000/svg"
 ET.register_namespace("",ns)
 def el(parent, name, attrs=None, text=None):
@@ -91,11 +91,11 @@ for week in range(last_week+1):
         count = days.get(date,0)
         x,y = pos(week,weekday)
         level = 0 if count==0 else min(4,1+int(math.log2(max(1,count))/2))
-        height_px = 3 if count==0 else 8+min(54,math.log2(count+1)*11)
+        height_px = 2 if count==0 else 5+min(38,math.log2(count+1)*7)
         top = ["#d0d7de","#9be9a8","#40c463","#30a14e","#216e39"][level]
         left = ["#aeb6be","#74ba81","#309b4b","#257d3c","#19592f"][level]
         right = ["#929ca6","#5d9c6b","#247c3d","#1c6330","#124624"][level]
-        w,h=10,5
+        w,h=8,4
         def polygon(points,color):
             el(root,"polygon",{"points":" ".join(f"{a:.1f},{b:.1f}" for a,b in points),
                 "fill":color})
@@ -103,7 +103,8 @@ for week in range(last_week+1):
         polygon([(x,y-height_px),(x+w,y-height_px+h),(x+w,y+h),(x,y)],left)
         polygon([(x+w,y-height_px+h),(x+2*w,y-height_px),(x+2*w,y),(x+w,y+h)],right)
 # Year markers along the lower edge of the timeline.
-for year in range(created.year,today.year+1):
+marker_years = sorted(set([created.year, today.year] + [created.year + round((today.year-created.year)*i/4) for i in range(1,4)]))
+for year in marker_years:
     marker=max(created,dt.date(year,1,1))
     week=(marker-first_sunday).days//7
     x,y=pos(week,6)
