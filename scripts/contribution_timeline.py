@@ -68,9 +68,9 @@ def add(parent, tag, attrs=None, text=None):
     return node
 
 # A wide, shallow city strip; GitHub scales it to the README width.
-step = 23
+step = 22
 width = 180 + (last_week + 1)*step
-height = 690
+height = 610
 root = ET.Element(f"{{{ns}}}svg", {
     "viewBox": f"0 0 {width} {height}", "width": str(width),
     "height": str(height), "role": "img",
@@ -87,7 +87,7 @@ add(root, "text", {"x":"75","y":"44","class":"label"}, "CONTRIBUTION HISTORY")
 add(root, "text", {"x":str(width-65),"y":"44","class":"range","text-anchor":"end"},
     f"{date_label(start_date)} – {date_label(today)}")
 # Pale isometric ground plane.
-add(root,"polygon",{"points":f"62,305 {width-72},305 {width-10},610 90,610",
+add(root,"polygon",{"points":f"62,305 {width-72},305 {width-10},515 90,515",
                     "fill":"#e2e8f0"})
 for day in range(7):
     for week in range(last_week+1):
@@ -95,15 +95,15 @@ for day in range(7):
         if date < start_date or date > today:
             continue
         count = days.get(date,0)
-        x = 72 + week*step + day*6.0
-        y = 315 + day*39
+        x = 72 + week*step + day*4.0
+        y = 315 + day*28
         # Contiguous isometric lots, including inactive days.
-        add(root,"polygon",{"points":f"{x:.1f},{y:.1f} {x+step:.1f},{y:.1f} {x+step+60:.1f},{y-39:.1f} {x+60:.1f},{y-39:.1f}",
+        add(root,"polygon",{"points":f"{x:.1f},{y:.1f} {x+step:.1f},{y:.1f} {x+step+15:.1f},{y-10:.1f} {x+15:.1f},{y-39:.1f}",
             "fill":"#dbe4ed","stroke":"#cbd5e1","stroke-width":"0.35"})
         # Tall skyscrapers for high-activity days; low-rise for ordinary days.
         h = 1.5 if count == 0 else min(195, 16 + 17*(count**0.68))
-        w = 23
-        depth = 60
+        w = 20
+        depth = 15
         palettes = [
             ("#536b85", "#30445d", "#7891aa"),
             ("#395c79", "#243f5c", "#6f91af"),
@@ -146,9 +146,9 @@ for year in range(start_date.year,today.year+1):
     date = max(start_date,dt.date(year,1,1))
     week = (date-first_sunday).days//7
     x = 80 + week*step
-    add(root,"line",{"x1":str(x),"y1":"620","x2":str(x),"y2":"642",
+    add(root,"line",{"x1":str(x),"y1":"532","x2":str(x),"y2":"552",
                      "stroke":"#94a3b8","stroke-width":"1.5"})
-    add(root,"text",{"x":str(x+5),"y":"672","class":"year"},date_label(date))
+    add(root,"text",{"x":str(x+5),"y":"583","class":"year"},date_label(date))
 Path("profile-3d-contrib").mkdir(exist_ok=True)
 ET.ElementTree(root).write("profile-3d-contrib/skyline-clean.svg",
                            encoding="unicode",xml_declaration=True)
