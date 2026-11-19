@@ -59,14 +59,17 @@ first_sunday = start_date - dt.timedelta(days=(start_date.weekday()+1)%7)
 last_week = (today-first_sunday).days//7
 # Each week has seven daily blocks across a visible isometric depth axis.
 # Leave enough horizontal separation to prevent neighboring weeks phasing.
-tile_x = 26.0
+tile_x = 24.0
 def pos(week, weekday=0):
-    return 64 + week*tile_x + weekday*6.0, 156 + weekday*10.0
+    return 100 + week*tile_x + weekday*3.0, 160 + weekday*12.0
 
-width = int(64 + (last_week+1)*tile_x + 125)
-height = 355
+width = int(100 + (last_week+1)*tile_x + 180)
+height = 400
 ns = "http://www.w3.org/2000/svg"
 ET.register_namespace("",ns)
+def long_date(value):
+    return f"{value.strftime('%B')} {value.day}, {value.year}"
+
 def el(parent, name, attrs=None, text=None):
     node = ET.SubElement(parent, f"{{{ns}}}{name}", attrs or {})
     if text is not None: node.text = str(text)
@@ -74,7 +77,7 @@ def el(parent, name, attrs=None, text=None):
 root = ET.Element(f"{{{ns}}}svg", {"viewBox":f"0 0 {width} {height}",
     "width":str(width),"height":str(height),"role":"img",
     "aria-label":f"Isometric GitHub contribution timeline from {start_date} to {today}"})
-el(root,"title",text=f"{USERNAME} GitHub contributions, {start_date} to {today}")
+el(root,"title",text=f"{USERNAME} GitHub contributions, {long_date(start_date)} to {long_date(today)}")
 el(root,"style",text="""
   .label {font: 600 25px system-ui,sans-serif;fill:#57606a}
   .range {font: 500 23px system-ui,sans-serif;fill:#57606a}
@@ -84,7 +87,7 @@ el(root,"style",text="""
   }
 """)
 el(root,"text",{"x":"64","y":"48","class":"label"},f"{USERNAME} / GitHub history")
-el(root,"text",{"x":str(width-55),"y":"48","class":"range","text-anchor":"end"},f"{start_date} – {today}")
+el(root,"text",{"x":str(width-55),"y":"48","class":"range","text-anchor":"end"},f"{long_date(start_date)} – {long_date(today)}")
 # Preserve daily contribution blocks and the full seven-row isometric depth.
 # Render back-to-front so nearer blocks properly occlude farther ones.
 for week in range(last_week+1):
@@ -115,7 +118,7 @@ for year in marker_years:
     el(root,"line",{"x1":f"{x+9:.1f}","y1":f"{y+16:.1f}",
                     "x2":f"{x+9:.1f}","y2":f"{y+45:.1f}",
                     "stroke":"#8b949e","stroke-width":"1.5","opacity":"0.7"})
-    el(root,"text",{"x":f"{x+13:.1f}","y":f"{y+76:.1f}","class":"year"},str(year))
+    el(root,"text",{"x":f"{x+13:.1f}","y":f"{y+76:.1f}","class":"year"},long_date(marker))
 Path("profile-3d-contrib").mkdir(exist_ok=True)
 ET.ElementTree(root).write("profile-3d-contrib/skyline-clean.svg",encoding="unicode",xml_declaration=True)
 print(f"Generated {start_date} through {today}; {len(days)} dated contributions; {width}x{height}")
