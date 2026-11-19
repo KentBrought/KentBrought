@@ -61,10 +61,10 @@ last_week = (today-first_sunday).days//7
 # Leave enough horizontal separation to prevent neighboring weeks phasing.
 tile_x = 24.0
 def pos(week, weekday=0):
-    return 100 + week*tile_x + weekday*3.0, 160 + weekday*12.0
+    return 100 + week*tile_x + weekday*3.0, 240 + weekday*12.0
 
 width = int(100 + (last_week+1)*tile_x + 180)
-height = 400
+height = 480
 ns = "http://www.w3.org/2000/svg"
 ET.register_namespace("",ns)
 def long_date(value):
@@ -98,7 +98,7 @@ for week in range(last_week+1):
         count = days.get(date, 0)
         x,y = pos(week, weekday)
         level = 0 if count == 0 else min(4, 1+int(math.log2(max(1,count))/2))
-        height_px = 2 if count == 0 else 6+min(46,math.log2(count+1)*8)
+        height_px = 2 if count == 0 else min(175, 8 + 13 * (count ** 0.62))
         top = ["#d0d7de","#9be9a8","#40c463","#30a14e","#216e39"][level]
         left = ["#aeb6be","#74ba81","#309b4b","#257d3c","#19592f"][level]
         right = ["#929ca6","#5d9c6b","#247c3d","#1c6330","#124624"][level]
