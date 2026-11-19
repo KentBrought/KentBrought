@@ -57,13 +57,14 @@ for year, user in by_year.items():
 start_date = max(created, dt.date(2024, 1, 1))
 first_sunday = start_date - dt.timedelta(days=(start_date.weekday()+1)%7)
 last_week = (today-first_sunday).days//7
-# One 3D column per week keeps the 2024-present timeline legible on mobile.
-tile_x = 18.0
-def pos(week):
-    return 64 + week*tile_x, 162
+# Each week has seven daily blocks across a visible isometric depth axis.
+# Leave enough horizontal separation to prevent neighboring weeks phasing.
+tile_x = 26.0
+def pos(week, weekday=0):
+    return 64 + week*tile_x + weekday*6.0, 156 + weekday*10.0
 
-width = int(64 + (last_week+1)*tile_x + 85)
-height = 280
+width = int(64 + (last_week+1)*tile_x + 125)
+height = 355
 ns = "http://www.w3.org/2000/svg"
 ET.register_namespace("",ns)
 def el(parent, name, attrs=None, text=None):
@@ -84,29 +85,33 @@ el(root,"style",text="""
 """)
 el(root,"text",{"x":"64","y":"48","class":"label"},f"{USERNAME} / GitHub history")
 el(root,"text",{"x":str(width-55),"y":"48","class":"range","text-anchor":"end"},f"{start_date} – {today}")
-# Aggregate daily contributions into one clearly separated 3D column per week.
+# Preserve daily contribution blocks and the full seven-row isometric depth.
+# Render back-to-front so nearer blocks properly occlude farther ones.
 for week in range(last_week+1):
-    dates = [first_sunday + dt.timedelta(days=week*7+day) for day in range(7)]
-    count = sum(days.get(date,0) for date in dates if start_date <= date <= today)
-    x,y = pos(week)
-    level = 0 if count == 0 else min(4, 1+int(math.log2(max(1,count))/2))
-    height_px = 2 if count == 0 else 5+min(62,math.log2(count+1)*9)
-    top = ["#d0d7de","#9be9a8","#40c463","#30a14e","#216e39"][level]
-    left = ["#aeb6be","#74ba81","#309b4b","#257d3c","#19592f"][level]
-    right = ["#929ca6","#5d9c6b","#247c3d","#1c6330","#124624"][level]
-    w,h = 7,4
-    def polygon(points,color):
-        el(root,"polygon",{"points":" ".join(f"{a:.1f},{b:.1f}" for a,b in points),
-                           "fill":color})
-    polygon([(x,y-height_px),(x+w,y-height_px-h),(x+2*w,y-height_px),(x+w,y-height_px+h)],top)
-    polygon([(x,y-height_px),(x+w,y-height_px+h),(x+w,y+h),(x,y)],left)
-    polygon([(x+w,y-height_px+h),(x+2*w,y-height_px),(x+2*w,y),(x+w,y+h)],right)
+    for weekday in range(7):
+        date = first_sunday + dt.timedelta(days=week*7+weekday)
+        if not (start_date <= date <= today):
+            continue
+        count = days.get(date, 0)
+        x,y = pos(week, weekday)
+        level = 0 if count == 0 else min(4, 1+int(math.log2(max(1,count))/2))
+        height_px = 2 if count == 0 else 6+min(46,math.log2(count+1)*8)
+        top = ["#d0d7de","#9be9a8","#40c463","#30a14e","#216e39"][level]
+        left = ["#aeb6be","#74ba81","#309b4b","#257d3c","#19592f"][level]
+        right = ["#929ca6","#5d9c6b","#247c3d","#1c6330","#124624"][level]
+        w,h = 7,4
+        def polygon(points,color):
+            el(root,"polygon",{"points":" ".join(f"{a:.1f},{b:.1f}" for a,b in points),
+                "fill":color,"stroke":"#ffffff","stroke-width":"0.35","stroke-opacity":"0.35"})
+        polygon([(x,y-height_px),(x+w,y-height_px-h),(x+2*w,y-height_px),(x+w,y-height_px+h)],top)
+        polygon([(x,y-height_px),(x+w,y-height_px+h),(x+w,y+h),(x,y)],left)
+        polygon([(x+w,y-height_px+h),(x+2*w,y-height_px),(x+2*w,y),(x+w,y+h)],right)
 # Year markers along the lower edge of the timeline.
 marker_years = list(range(start_date.year, today.year+1))
 for year in marker_years:
     marker=max(start_date,dt.date(year,1,1))
     week=(marker-first_sunday).days//7
-    x,y=pos(week)
+    x,y=pos(week,6)
     el(root,"line",{"x1":f"{x+9:.1f}","y1":f"{y+16:.1f}",
                     "x2":f"{x+9:.1f}","y2":f"{y+45:.1f}",
                     "stroke":"#8b949e","stroke-width":"1.5","opacity":"0.7"})
