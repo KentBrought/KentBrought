@@ -34,6 +34,14 @@ I like turning ideas into things people can actually use. Some of my work is pri
 
 *GitHub.com stats don't include all of my private or MIT GitHub Enterprise instance work.*
 
+### 🐍 Contribution Snake
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/KentBrought/KentBrought/output/github-contribution-grid-snake-dark.svg" />
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/KentBrought/KentBrought/output/github-contribution-grid-snake.svg" />
+  <img alt="Animated contribution snake eating Kent's GitHub contributions" src="https://raw.githubusercontent.com/KentBrought/KentBrought/output/github-contribution-grid-snake.svg" />
+</picture>
+
 ---
 
 *Always building something new.* 🔥
