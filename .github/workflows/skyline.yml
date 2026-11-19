@@ -34,5 +34,6 @@ jobs:
           git add profile-3d-contrib/
           if ! git diff --cached --quiet; then
             git commit -m "Update 3D contribution city"
-            git push
+            git pull --rebase origin main
+            git push origin HEAD:main
           fi
