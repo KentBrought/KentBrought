@@ -31,4 +31,4 @@ Some of my work is private or on the MIT GitHub Enterprise instance.
 
 ### Contribution Skyline
 
-![3D GitHub contribution city](./profile-3d-contrib/profile-night-green.svg)
+![3D GitHub contribution skyline with date range](./profile-3d-contrib/skyline-clean.svg)
