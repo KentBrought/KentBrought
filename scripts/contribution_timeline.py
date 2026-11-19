@@ -54,7 +54,8 @@ for year, user in by_year.items():
                 days[d] = int(day["contributionCount"])
 
 # One uninterrupted week-by-week city, spanning account creation through today.
-first_sunday = created - dt.timedelta(days=(created.weekday()+1)%7)
+start_date = max(created, dt.date(2024, 1, 1))
+first_sunday = start_date - dt.timedelta(days=(start_date.weekday()+1)%7)
 last_week = (today-first_sunday).days//7
 tile_x, tile_y = 11.0, 5.0
 # Isometric view: weeks run horizontally, weekdays run diagonally down-right.
@@ -71,7 +72,7 @@ def el(parent, name, attrs=None, text=None):
     return node
 root = ET.Element(f"{{{ns}}}svg", {"viewBox":f"0 0 {width} {height}",
     "width":str(width),"height":str(height),"role":"img",
-    "aria-label":f"Isometric GitHub contribution timeline from {created} to {today}"})
+    "aria-label":f"Isometric GitHub contribution timeline from {start_date} to {today}"})
 el(root,"title",text=f"{USERNAME} GitHub contributions, {created} to {today}")
 el(root,"style",text="""
   .label {font: 600 25px system-ui,sans-serif;fill:#57606a}
@@ -82,12 +83,12 @@ el(root,"style",text="""
   }
 """)
 el(root,"text",{"x":"64","y":"48","class":"label"},f"{USERNAME} / GitHub history")
-el(root,"text",{"x":str(width-55),"y":"48","class":"range","text-anchor":"end"},f"{created} – {today}")
+el(root,"text",{"x":str(width-55),"y":"48","class":"range","text-anchor":"end"},f"{start_date} – {today}")
 # Draw all tiles, including zero days, in back-to-front order.
 for week in range(last_week+1):
     for weekday in range(7):
         date = first_sunday + dt.timedelta(days=week*7+weekday)
-        if not (created <= date <= today): continue
+        if not (start_date <= date <= today): continue
         count = days.get(date,0)
         x,y = pos(week,weekday)
         level = 0 if count==0 else min(4,1+int(math.log2(max(1,count))/2))
@@ -103,9 +104,9 @@ for week in range(last_week+1):
         polygon([(x,y-height_px),(x+w,y-height_px+h),(x+w,y+h),(x,y)],left)
         polygon([(x+w,y-height_px+h),(x+2*w,y-height_px),(x+2*w,y),(x+w,y+h)],right)
 # Year markers along the lower edge of the timeline.
-marker_years = sorted(set([created.year, today.year] + [created.year + round((today.year-created.year)*i/4) for i in range(1,4)]))
+marker_years = list(range(start_date.year, today.year+1))
 for year in marker_years:
-    marker=max(created,dt.date(year,1,1))
+    marker=max(start_date,dt.date(year,1,1))
     week=(marker-first_sunday).days//7
     x,y=pos(week,6)
     el(root,"line",{"x1":f"{x+9:.1f}","y1":f"{y+22:.1f}",
@@ -114,4 +115,4 @@ for year in marker_years:
     el(root,"text",{"x":f"{x+13:.1f}","y":f"{y+95:.1f}","class":"year"},str(year))
 Path("profile-3d-contrib").mkdir(exist_ok=True)
 ET.ElementTree(root).write("profile-3d-contrib/skyline-clean.svg",encoding="unicode",xml_declaration=True)
-print(f"Generated {created} through {today}; {len(days)} dated contributions; {width}x{height}")
+print(f"Generated {start_date} through {today}; {len(days)} dated contributions; {width}x{height}")
