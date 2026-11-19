@@ -71,7 +71,7 @@ def add(parent, tag, attrs=None, text=None):
 # Each real contribution day is rendered as two visual lots, not two days.
 step = 20
 width = 170 + (last_week + 1)*step
-height = 445
+height = 540
 root = ET.Element(f"{{{ns}}}svg", {
     "viewBox": f"0 0 {width} {height}", "width": str(width),
     "height": str(height), "role": "img",
@@ -98,17 +98,18 @@ palettes = [
 ]
 def poly(points,fill):
     add(root,"polygon",{"points":" ".join(f"{px:.2f},{py:.2f}" for px,py in points),"fill":fill})
-# Fourteen tightly packed rows; depth is retained but the row-to-row gap is nearly eliminated.
-for row in range(14):
-    day, variant = divmod(row,2)
+# Twenty-nine tightly packed visual rows (15 more than before), using the same seven daily counts.
+for row in range(29):
+    day = min(6, row * 7 // 29)
+    variant = row % 4
     for week in range(last_week+1):
         date = first_sunday + dt.timedelta(days=week*7+day)
         if not start_date <= date <= today:
             continue
         count = days.get(date,0)
         # Each daily count drives both small buildings in its day.
-        x = 70 + week*step + row*2.3
-        y = 200 + row*7.5
+        x = 70 + week*step + row*1.1
+        y = 190 + row*7.2
         w,depth,slant = 18.0, 8.0, 5.2
         h = 2 if count == 0 else min(115, 8+11*(count**0.58))
         h *= 0.83 if variant else 1.0
@@ -137,9 +138,9 @@ for year in range(start_date.year,today.year+1):
     date=max(start_date,dt.date(year,1,1))
     week=(date-first_sunday).days//7
     x=78+week*step
-    add(root,"line",{"x1":str(x),"y1":"342","x2":str(x),"y2":"361",
+    add(root,"line",{"x1":str(x),"y1":"416","x2":str(x),"y2":"435",
                      "stroke":"#94a3b8","stroke-width":"1.5"})
-    add(root,"text",{"x":str(x+5),"y":"390","class":"year"},date_label(date))
+    add(root,"text",{"x":str(x+5),"y":"465","class":"year"},date_label(date))
 Path("profile-3d-contrib").mkdir(exist_ok=True)
 ET.ElementTree(root).write("profile-3d-contrib/skyline-clean.svg",
                            encoding="unicode",xml_declaration=True)
