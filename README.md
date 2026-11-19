@@ -20,7 +20,10 @@ Some of my work is private or on the MIT GitHub Enterprise instance.
 
 ### GitHub Stats
 
-![GitHub statistics showing total commits, pull requests, and merged pull requests](https://github-readme-stats-eta-gold.vercel.app/api?username=KentBrought&include_all_commits=true&show_icons=true&hide_rank=true&hide=stars,issues,contribs&show=prs_merged&theme=transparent&hide_border=true)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github-readme-stats-eta-gold.vercel.app/api?username=KentBrought&include_all_commits=true&show_icons=true&hide_rank=true&hide=stars,issues,contribs&show=prs_merged&theme=transparent&hide_border=true&hide_title=true&card_width=420&line_height=26&bg_color=00000000&text_color=c9d1d9&icon_color=58a6ff" />
+  <img alt="GitHub statistics showing total commits, pull requests, and merged pull requests" src="https://github-readme-stats-eta-gold.vercel.app/api?username=KentBrought&include_all_commits=true&show_icons=true&hide_rank=true&hide=stars,issues,contribs&show=prs_merged&theme=transparent&hide_border=true&hide_title=true&card_width=420&line_height=26&bg_color=00000000&text_color=24292f&icon_color=0969da" />
+</picture>
 
 ### Most Used Languages
 
