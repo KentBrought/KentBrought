@@ -53,72 +53,90 @@ for year, user in by_year.items():
             if created <= d <= today:
                 days[d] = int(day["contributionCount"])
 
-# One uninterrupted week-by-week city, spanning account creation through today.
+# An architectural contribution city: seven daily rows per week, 2024 onward.
 start_date = max(created, dt.date(2024, 1, 1))
-first_sunday = start_date - dt.timedelta(days=(start_date.weekday()+1)%7)
-last_week = (today-first_sunday).days//7
-# Each week has seven daily blocks across a visible isometric depth axis.
-# Leave enough horizontal separation to prevent neighboring weeks phasing.
-tile_x = 24.0
-def pos(week, weekday=0):
-    return 100 + week*tile_x + weekday*3.0, 240 + weekday*12.0
-
-width = int(100 + (last_week+1)*tile_x + 180)
-height = 480
+first_sunday = start_date - dt.timedelta(days=(start_date.weekday()+1) % 7)
+last_week = (today-first_sunday).days // 7
 ns = "http://www.w3.org/2000/svg"
-ET.register_namespace("",ns)
-def long_date(value):
-    return f"{value.strftime('%B')} {value.day}, {value.year}"
-
-def el(parent, name, attrs=None, text=None):
-    node = ET.SubElement(parent, f"{{{ns}}}{name}", attrs or {})
-    if text is not None: node.text = str(text)
+ET.register_namespace("", ns)
+def date_label(d):
+    return f"{d.strftime('%B')} {d.day}, {d.year}"
+def add(parent, tag, attrs=None, text=None):
+    node = ET.SubElement(parent, f"{{{ns}}}{tag}", attrs or {})
+    if text is not None:
+        node.text = str(text)
     return node
-root = ET.Element(f"{{{ns}}}svg", {"viewBox":f"0 0 {width} {height}",
-    "width":str(width),"height":str(height),"role":"img",
-    "aria-label":f"Isometric GitHub contribution timeline from {start_date} to {today}"})
-el(root,"title",text=f"{USERNAME} GitHub contributions, {long_date(start_date)} to {long_date(today)}")
-el(root,"style",text="""
-  .label {font: 600 25px system-ui,sans-serif;fill:#57606a}
-  .range {font: 500 23px system-ui,sans-serif;fill:#57606a}
-  .year {font: 600 23px system-ui,sans-serif;fill:#57606a}
-  @media(prefers-color-scheme:dark) {
-    .label,.range,.year {fill:#8b949e}
-  }
+
+# A wide, shallow city strip; GitHub scales it to the README width.
+step = 25
+width = 180 + (last_week + 1)*step
+height = 420
+root = ET.Element(f"{{{ns}}}svg", {
+    "viewBox": f"0 0 {width} {height}", "width": str(width),
+    "height": str(height), "role": "img",
+    "aria-label": f"3D contribution city from {date_label(start_date)} to {date_label(today)}"
+})
+add(root, "title", text=f"Contribution History: {date_label(start_date)} – {date_label(today)}")
+add(root, "style", text="""
+.label {font:600 24px system-ui,sans-serif;fill:#475569}
+.range {font:500 22px system-ui,sans-serif;fill:#64748b}
+.year {font:600 23px system-ui,sans-serif;fill:#475569}
 """)
-el(root,"text",{"x":"64","y":"48","class":"label"},f"{USERNAME} / GitHub history")
-el(root,"text",{"x":str(width-55),"y":"48","class":"range","text-anchor":"end"},f"{long_date(start_date)} – {long_date(today)}")
-# Preserve daily contribution blocks and the full seven-row isometric depth.
-# Render back-to-front so nearer blocks properly occlude farther ones.
+add(root, "rect", {"width":str(width),"height":str(height),"fill":"#f8fafc"})
+add(root, "text", {"x":"75","y":"44","class":"label"}, "CONTRIBUTION HISTORY")
+add(root, "text", {"x":str(width-65),"y":"44","class":"range","text-anchor":"end"},
+    f"{date_label(start_date)} – {date_label(today)}")
+# Pale isometric ground plane.
+add(root,"polygon",{"points":f"62,289 {width-72},289 {width-30},365 104,365",
+                    "fill":"#e2e8f0"})
 for week in range(last_week+1):
-    for weekday in range(7):
-        date = first_sunday + dt.timedelta(days=week*7+weekday)
-        if not (start_date <= date <= today):
+    for day in range(7):
+        date = first_sunday + dt.timedelta(days=week*7+day)
+        if date < start_date or date > today:
             continue
-        count = days.get(date, 0)
-        x,y = pos(week, weekday)
-        level = 0 if count == 0 else min(4, 1+int(math.log2(max(1,count))/2))
-        height_px = 2 if count == 0 else min(175, 8 + 13 * (count ** 0.62))
-        top = ["#d0d7de","#9be9a8","#40c463","#30a14e","#216e39"][level]
-        left = ["#aeb6be","#74ba81","#309b4b","#257d3c","#19592f"][level]
-        right = ["#929ca6","#5d9c6b","#247c3d","#1c6330","#124624"][level]
-        w,h = 7,4
-        def polygon(points,color):
-            el(root,"polygon",{"points":" ".join(f"{a:.1f},{b:.1f}" for a,b in points),
-                "fill":color,"stroke":"#ffffff","stroke-width":"0.35","stroke-opacity":"0.35"})
-        polygon([(x,y-height_px),(x+w,y-height_px-h),(x+2*w,y-height_px),(x+w,y-height_px+h)],top)
-        polygon([(x,y-height_px),(x+w,y-height_px+h),(x+w,y+h),(x,y)],left)
-        polygon([(x+w,y-height_px+h),(x+2*w,y-height_px),(x+2*w,y),(x+w,y+h)],right)
-# Year markers along the lower edge of the timeline.
-marker_years = list(range(start_date.year, today.year+1))
-for year in marker_years:
-    marker=max(start_date,dt.date(year,1,1))
-    week=(marker-first_sunday).days//7
-    x,y=pos(week,6)
-    el(root,"line",{"x1":f"{x+9:.1f}","y1":f"{y+16:.1f}",
-                    "x2":f"{x+9:.1f}","y2":f"{y+45:.1f}",
-                    "stroke":"#8b949e","stroke-width":"1.5","opacity":"0.7"})
-    el(root,"text",{"x":f"{x+13:.1f}","y":f"{y+76:.1f}","class":"year"},long_date(marker))
+        count = days.get(date,0)
+        x = 72 + week*step + day*4.2
+        y = 285 + day*9.5
+        # Tall skyscrapers for high-activity days; low-rise for ordinary days.
+        h = 3 if count == 0 else min(160, 10 + 12*(count**0.68))
+        w = 12
+        depth = 5
+        if count == 0:
+            front, side, roof = "#cbd5e1","#b6c3d1","#e2e8f0"
+        elif count < 3:
+            front, side, roof = "#54718e","#334e6c","#7996b4"
+        elif count < 8:
+            front, side, roof = "#355575","#233e60","#6084a9"
+        else:
+            front, side, roof = "#213b60","#172d4c","#426b9c"
+        def poly(points,fill):
+            add(root,"polygon",{"points":" ".join(f"{px:.1f},{py:.1f}" for px,py in points),
+                                "fill":fill})
+        # Left/front face, right side and roof are separate architectural planes.
+        poly([(x,y-h),(x+w,y-h),(x+w,y),(x,y)],front)
+        poly([(x+w,y-h),(x+w+depth,y-h-depth*0.65),
+              (x+w+depth,y-depth*0.65),(x+w,y)],side)
+        poly([(x,y-h),(x+depth,y-h-depth*0.65),
+              (x+w+depth,y-h-depth*0.65),(x+w,y-h)],roof)
+        # Illuminated windows, aligned into recognizable building facades.
+        if count:
+            floors = int(max(0,h-9)//9)
+            for floor in range(floors):
+                wy = y-h+7+floor*9
+                for column in range(2):
+                    if (week*11+day*7+floor*3+column)%5 != 0:
+                        add(root,"rect",{"x":f"{x+2+column*5:.1f}","y":f"{wy:.1f}",
+                            "width":"2.5","height":"3.4","fill":"#8ed9f3",
+                            "opacity":"0.88"})
+# Date ticks on the street edge, unobstructed by buildings.
+for year in range(start_date.year,today.year+1):
+    date = max(start_date,dt.date(year,1,1))
+    week = (date-first_sunday).days//7
+    x = 80 + week*step
+    add(root,"line",{"x1":str(x),"y1":"370","x2":str(x),"y2":"390",
+                     "stroke":"#94a3b8","stroke-width":"1.5"})
+    add(root,"text",{"x":str(x+5),"y":"412","class":"year"},date_label(date))
 Path("profile-3d-contrib").mkdir(exist_ok=True)
-ET.ElementTree(root).write("profile-3d-contrib/skyline-clean.svg",encoding="unicode",xml_declaration=True)
-print(f"Generated {start_date} through {today}; {len(days)} dated contributions; {width}x{height}")
+ET.ElementTree(root).write("profile-3d-contrib/skyline-clean.svg",
+                           encoding="unicode",xml_declaration=True)
+print(f"Generated architectural city {date_label(start_date)} to {date_label(today)}")
