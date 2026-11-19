@@ -1,4 +1,4 @@
-name: Generate 3D contribution skyline
+name: Generate full-history 3D contribution skyline
 
 on:
   workflow_dispatch:
@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/skyline.yml'
+      - 'scripts/contribution_timeline.py'
 
 permissions:
   contents: write
@@ -22,53 +23,18 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Generate 3D contribution city
-        uses: yoshi389111/github-profile-3d-contrib@latest
+      - name: Generate all-time 3D contribution city
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SKYLINE_TOKEN || secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
-      - name: Simplify skyline for README
-        run: |
-          python3 - <<'PY'
-          import copy
-          import re
-          import xml.etree.ElementTree as ET
-          from pathlib import Path
-
-          source = Path("profile-3d-contrib/profile-night-green.svg")
-          raw = source.read_text()
-          match = re.search(r"(20\d{2}-\d{2}-\d{2}) / (20\d{2}-\d{2}-\d{2})", raw)
-          start, end = match.groups() if match else ("", "")
-          ns = "http://www.w3.org/2000/svg"
-          ET.register_namespace("", ns)
-          root = ET.fromstring(raw)
-          def tag(name): return f"{{{ns}}}{name}"
-          style = next(e for e in root if e.tag == tag("style"))
-          city = next(e for e in root if e.tag == tag("g"))
-          output = ET.Element(tag("svg"), {"width":"1280", "height":"740", "viewBox":"0 0 1280 740", "role":"img", "aria-label":f"3D GitHub contributions from {start} to {end}"})
-          css = ET.SubElement(output, tag("style"))
-          css.text = (style.text or "") + """
-          .fill-fg { fill: #24292f; }
-          .fill-weak { fill: #57606a; }
-          @media (prefers-color-scheme: dark) {
-            .fill-fg { fill: #c9d1d9; }
-            .fill-weak { fill: #8b949e; }
-          }
-          """
-          output.append(copy.deepcopy(city))
-          if start and end:
-            label = ET.SubElement(output, tag("text"), {"x":"1240", "y":"42", "text-anchor":"end", "class":"fill-weak", "style":"font-size: 22px;"})
-            label.text = f"{start} – {end}"
-          ET.ElementTree(output).write("profile-3d-contrib/skyline-clean.svg", encoding="unicode", xml_declaration=True)
-          PY
-
-      - name: Commit generated images
+        run: python3 scripts/contribution_timeline.py
+      - name: Commit generated SVG
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add profile-3d-contrib/
+          git add profile-3d-contrib/skyline-clean.svg
           if ! git diff --cached --quiet; then
-            git commit -m "Update 3D contribution city"
+            git commit -m "Update full-history 3D contribution skyline"
             git pull --rebase origin main
             git push origin HEAD:main
           fi
