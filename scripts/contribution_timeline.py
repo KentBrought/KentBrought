@@ -68,9 +68,9 @@ def add(parent, tag, attrs=None, text=None):
     return node
 
 # A wide, shallow city strip; GitHub scales it to the README width.
-step = 17
+step = 24
 width = 180 + (last_week + 1)*step
-height = 420
+height = 610
 root = ET.Element(f"{{{ns}}}svg", {
     "viewBox": f"0 0 {width} {height}", "width": str(width),
     "height": str(height), "role": "img",
@@ -87,7 +87,7 @@ add(root, "text", {"x":"75","y":"44","class":"label"}, "CONTRIBUTION HISTORY")
 add(root, "text", {"x":str(width-65),"y":"44","class":"range","text-anchor":"end"},
     f"{date_label(start_date)} – {date_label(today)}")
 # Pale isometric ground plane.
-add(root,"polygon",{"points":f"62,289 {width-72},289 {width-30},365 78,365",
+add(root,"polygon",{"points":f"62,310 {width-72},310 {width-30},525 78,525",
                     "fill":"#e2e8f0"})
 for day in range(7):
     for week in range(last_week+1):
@@ -95,12 +95,12 @@ for day in range(7):
         if date < start_date or date > today:
             continue
         count = days.get(date,0)
-        x = 72 + week*step + day*2.5
-        y = 285 + day*10.5
+        x = 72 + week*step + day*3.2
+        y = 310 + day*29
         # Tall skyscrapers for high-activity days; low-rise for ordinary days.
-        h = 1.5 if count == 0 else min(145, 10 + 12*(count**0.68))
-        w = 12
-        depth = 4.5
+        h = 1.5 if count == 0 else min(195, 16 + 17*(count**0.68))
+        w = 18
+        depth = 11
         palettes = [
             ("#536b85", "#30445d", "#7891aa"),
             ("#395c79", "#243f5c", "#6f91af"),
@@ -124,28 +124,28 @@ for day in range(7):
               (x+w+depth,y-h-depth*0.65),(x+w,y-h)],roof)
         # Window strips on BOTH exposed faces, kept inside the building geometry.
         if count:
-            floors = int(max(0,h-10)//9)
+            floors = int(max(0,h-14)//12)
             for floor in range(floors):
-                wy = y-h+7+floor*9
-                for column in range(2):
+                wy = y-h+9+floor*12
+                for column in range(3):
                     if (week*11+day*7+floor*3+column)%5 != 0:
-                        add(root,"rect",{"x":f"{x+2+column*5:.1f}","y":f"{wy:.1f}",
-                            "width":"2.6","height":"3.4","fill":"#a4e2f2",
+                        add(root,"rect",{"x":f"{x+3+column*5:.1f}","y":f"{wy:.1f}",
+                            "width":"2.8","height":"4.2","fill":"#a4e2f2",
                             "opacity":"0.9"})
                 # Side-face windows follow the slanted facade as parallelograms.
                 if (week*3+day*5+floor*2)%4 != 0:
-                    wx = x+w+1.1
-                    wy_side = wy-1.3
-                    poly([(wx,wy_side),(wx+1.6,wy_side-1.0),
-                          (wx+1.6,wy_side+2.1),(wx,wy_side+3.1)],"#7ac6e5")
+                    wx = x+w+2.2
+                    wy_side = wy-2.2
+                    poly([(wx,wy_side),(wx+2.3,wy_side-1.5),
+                          (wx+2.3,wy_side+2.8),(wx,wy_side+4.3)],"#7ac6e5")
 # Date ticks on the street edge, unobstructed by buildings.
 for year in range(start_date.year,today.year+1):
     date = max(start_date,dt.date(year,1,1))
     week = (date-first_sunday).days//7
     x = 80 + week*step
-    add(root,"line",{"x1":str(x),"y1":"370","x2":str(x),"y2":"390",
+    add(root,"line",{"x1":str(x),"y1":"532","x2":str(x),"y2":"552",
                      "stroke":"#94a3b8","stroke-width":"1.5"})
-    add(root,"text",{"x":str(x+5),"y":"412","class":"year"},date_label(date))
+    add(root,"text",{"x":str(x+5),"y":"583","class":"year"},date_label(date))
 Path("profile-3d-contrib").mkdir(exist_ok=True)
 ET.ElementTree(root).write("profile-3d-contrib/skyline-clean.svg",
                            encoding="unicode",xml_declaration=True)
