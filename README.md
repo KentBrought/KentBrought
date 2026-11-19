@@ -28,3 +28,7 @@ Some of my work is private or on the MIT GitHub Enterprise instance.
 ### Most Used Languages
 
 <img alt="Donut chart of Kent's most-used GitHub languages" src="https://github-readme-stats-eta-gold.vercel.app/api/top-langs/?username=KentBrought&layout=donut&langs_count=10&count_private=true&hide_border=true&hide_title=true"/>
+
+### Contribution Skyline
+
+![Animated GitHub contribution skyline](https://raw.githubusercontent.com/KentBrought/KentBrought/skyline-output/skyline.svg)
