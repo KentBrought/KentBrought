@@ -89,26 +89,30 @@ add(root, "text", {"x":str(width-65),"y":"44","class":"range","text-anchor":"end
 # Pale isometric ground plane.
 add(root,"polygon",{"points":f"62,289 {width-72},289 {width-30},365 104,365",
                     "fill":"#e2e8f0"})
-for week in range(last_week+1):
-    for day in range(7):
+for day in range(7):
+    for week in range(last_week+1):
         date = first_sunday + dt.timedelta(days=week*7+day)
         if date < start_date or date > today:
             continue
         count = days.get(date,0)
-        x = 72 + week*step + day*4.2
-        y = 285 + day*9.5
+        x = 72 + week*step + day*3.2
+        y = 285 + day*7.5
         # Tall skyscrapers for high-activity days; low-rise for ordinary days.
         h = 3 if count == 0 else min(160, 10 + 12*(count**0.68))
-        w = 12
-        depth = 5
+        w = 13
+        depth = 6
+        palettes = [
+            ("#536b85", "#30445d", "#7891aa"),
+            ("#395c79", "#243f5c", "#6f91af"),
+            ("#4b7186", "#315366", "#8aabba"),
+            ("#53647d", "#34455e", "#8b9ab0"),
+            ("#466f7c", "#28525e", "#81a6af"),
+            ("#64748b", "#475569", "#94a3b8"),
+            ("#3e597b", "#283e5d", "#718bac"),
+        ]
+        front, side, roof = palettes[(week*7 + day*11) % len(palettes)]
         if count == 0:
-            front, side, roof = "#cbd5e1","#b6c3d1","#e2e8f0"
-        elif count < 3:
-            front, side, roof = "#54718e","#334e6c","#7996b4"
-        elif count < 8:
-            front, side, roof = "#355575","#233e60","#6084a9"
-        else:
-            front, side, roof = "#213b60","#172d4c","#426b9c"
+            front, side, roof = "#cbd5e1", "#aebfce", "#e2e8f0"
         def poly(points,fill):
             add(root,"polygon",{"points":" ".join(f"{px:.1f},{py:.1f}" for px,py in points),
                                 "fill":fill})
@@ -118,16 +122,23 @@ for week in range(last_week+1):
               (x+w+depth,y-depth*0.65),(x+w,y)],side)
         poly([(x,y-h),(x+depth,y-h-depth*0.65),
               (x+w+depth,y-h-depth*0.65),(x+w,y-h)],roof)
-        # Illuminated windows, aligned into recognizable building facades.
+        # Window strips on BOTH exposed faces, kept inside the building geometry.
         if count:
-            floors = int(max(0,h-9)//9)
+            floors = int(max(0,h-10)//9)
             for floor in range(floors):
                 wy = y-h+7+floor*9
                 for column in range(2):
                     if (week*11+day*7+floor*3+column)%5 != 0:
                         add(root,"rect",{"x":f"{x+2+column*5:.1f}","y":f"{wy:.1f}",
-                            "width":"2.5","height":"3.4","fill":"#8ed9f3",
-                            "opacity":"0.88"})
+                            "width":"2.6","height":"3.4","fill":"#a4e2f2",
+                            "opacity":"0.9"})
+                # Side-face windows follow the slanted facade as parallelograms.
+                for column in range(2):
+                    if (week*3+day*5+floor*2+column)%4 != 0:
+                        wx = x+w+1.0+column*2.3
+                        wy_side = wy-(column+0.5)*depth*0.65/2
+                        poly([(wx,wy_side),(wx+1.7,wy_side-1.1),
+                              (wx+1.7,wy_side+2.0),(wx,wy_side+3.1)],"#7ac6e5")
 # Date ticks on the street edge, unobstructed by buildings.
 for year in range(start_date.year,today.year+1):
     date = max(start_date,dt.date(year,1,1))
