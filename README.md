@@ -1,11 +1,6 @@
 # Kent Brought <img src="https://raw.githubusercontent.com/ABSphreak/ABSphreak/master/gifs/Hi.gif" width="30px" alt="Waving hand" />
 
-MIT '26 · San Francisco
-
-**Portfolio:** https://kentbrought.github.io/  
-**MIT GitHub Enterprise instance:** https://github.mit.edu/kbrought
-
-[LinkedIn](https://www.linkedin.com/in/kent-brought)
+**MIT GitHub Enterprise instance (old):** https://github.mit.edu/kbrought
 
 Some of my work is private or on the MIT GitHub Enterprise instance.
 
@@ -18,7 +13,7 @@ Some of my work is private or on the MIT GitHub Enterprise instance.
 ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
 ![WebRTC](https://img.shields.io/badge/WebRTC-333333?style=flat-square&logo=webrtc&logoColor=white)
 
-### GitHub Stats
+### Stats
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github-readme-stats-eta-gold.vercel.app/api?username=KentBrought&include_all_commits=true&show_icons=true&hide_rank=true&hide=stars,issues,contribs&show=prs_merged&theme=transparent&hide_border=true&hide_title=true&card_width=420&line_height=26&bg_color=00000000&text_color=c9d1d9&icon_color=58a6ff" />
