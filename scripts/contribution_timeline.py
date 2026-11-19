@@ -68,7 +68,7 @@ def add(parent, tag, attrs=None, text=None):
     return node
 
 # A wide, shallow city strip; GitHub scales it to the README width.
-step = 25
+step = 17
 width = 180 + (last_week + 1)*step
 height = 420
 root = ET.Element(f"{{{ns}}}svg", {
@@ -87,7 +87,7 @@ add(root, "text", {"x":"75","y":"44","class":"label"}, "CONTRIBUTION HISTORY")
 add(root, "text", {"x":str(width-65),"y":"44","class":"range","text-anchor":"end"},
     f"{date_label(start_date)} – {date_label(today)}")
 # Pale isometric ground plane.
-add(root,"polygon",{"points":f"62,289 {width-72},289 {width-30},365 104,365",
+add(root,"polygon",{"points":f"62,289 {width-72},289 {width-30},365 78,365",
                     "fill":"#e2e8f0"})
 for day in range(7):
     for week in range(last_week+1):
@@ -95,12 +95,12 @@ for day in range(7):
         if date < start_date or date > today:
             continue
         count = days.get(date,0)
-        x = 72 + week*step + day*3.2
-        y = 285 + day*7.5
+        x = 72 + week*step + day*2.5
+        y = 285 + day*10.5
         # Tall skyscrapers for high-activity days; low-rise for ordinary days.
-        h = 3 if count == 0 else min(160, 10 + 12*(count**0.68))
-        w = 13
-        depth = 6
+        h = 1.5 if count == 0 else min(145, 10 + 12*(count**0.68))
+        w = 12
+        depth = 4.5
         palettes = [
             ("#536b85", "#30445d", "#7891aa"),
             ("#395c79", "#243f5c", "#6f91af"),
@@ -116,7 +116,7 @@ for day in range(7):
         def poly(points,fill):
             add(root,"polygon",{"points":" ".join(f"{px:.1f},{py:.1f}" for px,py in points),
                                 "fill":fill})
-        # Left/front face, right side and roof are separate architectural planes.
+        # Draw rear-to-front, with disjoint footprints and roof always on top.
         poly([(x,y-h),(x+w,y-h),(x+w,y),(x,y)],front)
         poly([(x+w,y-h),(x+w+depth,y-h-depth*0.65),
               (x+w+depth,y-depth*0.65),(x+w,y)],side)
@@ -133,12 +133,11 @@ for day in range(7):
                             "width":"2.6","height":"3.4","fill":"#a4e2f2",
                             "opacity":"0.9"})
                 # Side-face windows follow the slanted facade as parallelograms.
-                for column in range(2):
-                    if (week*3+day*5+floor*2+column)%4 != 0:
-                        wx = x+w+1.0+column*2.3
-                        wy_side = wy-(column+0.5)*depth*0.65/2
-                        poly([(wx,wy_side),(wx+1.7,wy_side-1.1),
-                              (wx+1.7,wy_side+2.0),(wx,wy_side+3.1)],"#7ac6e5")
+                if (week*3+day*5+floor*2)%4 != 0:
+                    wx = x+w+1.1
+                    wy_side = wy-1.3
+                    poly([(wx,wy_side),(wx+1.6,wy_side-1.0),
+                          (wx+1.6,wy_side+2.1),(wx,wy_side+3.1)],"#7ac6e5")
 # Date ticks on the street edge, unobstructed by buildings.
 for year in range(start_date.year,today.year+1):
     date = max(start_date,dt.date(year,1,1))
