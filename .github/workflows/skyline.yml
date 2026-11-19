@@ -37,7 +37,7 @@ jobs:
 
           source = Path("profile-3d-contrib/profile-night-green.svg")
           raw = source.read_text()
-          match = re.search(r"(20\\d{2}-\\d{2}-\\d{2}) / (20\\d{2}-\\d{2}-\\d{2})", raw)
+          match = re.search(r"(20\d{2}-\d{2}-\d{2}) / (20\d{2}-\d{2}-\d{2})", raw)
           start, end = match.groups() if match else ("", "")
           ns = "http://www.w3.org/2000/svg"
           ET.register_namespace("", ns)
