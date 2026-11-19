@@ -1,0 +1,39 @@
+name: Generate contribution skyline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 4 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: contribution-skyline
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+
+      - name: Generate animated skyline SVG
+        env:
+          GITHUB_TOKEN: ${{ secrets.SKYLINE_TOKEN || secrets.GITHUB_TOKEN }}
+        run: go run github.com/pinkpixel-dev/skyline@latest -theme neon -svg skyline.svg "${{ github.repository_owner }}"
+
+      - name: Publish skyline to its own branch
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir out && mv skyline.svg out/ && cd out
+          git init -q -b skyline-output
+          git add skyline.svg
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -qm "Update contribution skyline"
+          git push -qf "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}.git" skyline-output
